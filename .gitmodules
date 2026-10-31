@@ -1,0 +1,6 @@
+[submodule "packages"]
+	path = packages
+	url = https://github.com/surprisedcat32/slate-ports.git
+[submodule "init"]
+	path = init
+	url = https://github.com/surprisedcat32/slate-initramfs.git
