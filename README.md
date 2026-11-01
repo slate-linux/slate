@@ -25,8 +25,9 @@ Remove a package:
     slate remove category/package
 
 List installed packages:
-    slate installed 
-Update Slate Version
+    slate installed
+ 
+Update Slate Version:
     slate update
 
 ## Configuration
