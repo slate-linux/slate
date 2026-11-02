@@ -11,10 +11,10 @@ Remove a package:
     slate remove category/package
 
 Search for a package:
-    slate search package
+    slate search package -- in progress
 
 List installed packages:
-    slate list
+    slate installed
 
 ## Package Names
 
@@ -26,8 +26,11 @@ For example, x11/dillo refers to the Dillo browser port.
 Each package can be installed individually by specifying its full category and name.
 
 Example:
+
     slate install lib/zlib
+    
     slate install net/curl
+    
     slate install x11/dillo
 
 ## Package Collections
