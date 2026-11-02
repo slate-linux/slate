@@ -1,0 +1,17 @@
+#!/bin/sh
+
+echo "Stopping services..."
+
+# Stop SSH
+[ -x /etc/init.d/sshd ] && /etc/init.d/sshd stop
+
+# Stop other services here
+
+echo "Syncing filesystems..."
+sync
+
+echo "Unmounting filesystems..."
+umount -a -r
+
+echo "Rebooting..."
+exec /usr/bin/reboot

@@ -1,0 +1,61 @@
+#!/bin/sh
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+export PATH
+
+BOOTLOG=/var/log/boot.log
+
+mkdir -p /var/log
+: > "$BOOTLOG"
+
+log() {
+    echo "$*" | tee -a "$BOOTLOG"
+}
+
+log "Starting Slate Linux..."
+
+FAILED=0
+
+for script in /etc/init.d/*; do
+    [ -f "$script" ] || continue
+
+    case "$script" in
+        *.sh|*.rc) continue ;;
+    esac
+
+    name=${script##*/}
+
+    log "Starting $name..."
+
+    start=$(date +%s)
+
+    if sh "$script" >> "$BOOTLOG" 2>&1; then
+        result="[ OK ]"
+    else
+        result="[FAIL]"
+        FAILED=$((FAILED + 1))
+    fi
+
+    end=$(date +%s)
+    elapsed=$((end - start))
+
+    log "$result $name (${elapsed}s)"
+done
+
+log "Initialization complete. Failures: $FAILED"
+
+clear
+
+spawn() {
+    while :; do
+        /bin/toybox getty 115200 "$1"
+        sleep 1
+    done
+}
+
+spawn tty1 &
+spawn tty2 &
+spawn tty3 &
+
+wait
+
