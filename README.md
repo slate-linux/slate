@@ -31,8 +31,10 @@ Update Slate Version:
     slate update
 
 ## Configuration
-The current version of slate is configured in /etc/slate.conf/ver
-Versions such as 0.4, 0.4.1,0.5 are supported as well as 'testing'
+The slate package manager is configured /etc/slate.conf/repos
+
+
+A git url and a release tag is required; if you want to use the most recent commit set it to testing
 ## Ports
 
 Slate uses a ports collection to build software from source.
