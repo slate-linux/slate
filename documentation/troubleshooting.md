@@ -1,42 +1,43 @@
 # Troubleshooting Slate
 
-This document covers basic troubleshooting steps for Slate installations.
+## Boot Problems
 
-## Package Installation Fails
+- Check kernel and initramfs configuration.
+- Verify /init exists.
+- Verify Toybox and helper binaries exist.
+- Check root filesystem selection.
+- Inspect kernel messages.
 
-- Verify that the package name and category are correct.
-- Check that the required dependencies are installed.
-- Check that the package source can be downloaded.
-- Review the build output for the first reported error.
+## Init Problems
 
-## Program Does Not Start
+- Inspect /var/log/boot.log.
+- Check startup script permissions.
+- Verify interpreter paths.
+- Run failing scripts manually.
 
-- Verify that the executable exists.
-- Check that the executable has permission to run.
-- Check whether required shared libraries are installed.
-- Inspect the program output for missing files or configuration.
+## Package Problems
 
-## Missing Shared Libraries
+- Verify package identifiers.
+- Check dependencies.
+- Check repository configuration.
+- Review build output.
+- Verify DESTDIR staging.
 
-Use ldd to inspect the shared library dependencies of a dynamically linked executable.
-For example:
+## Program Problems
+
+Check executable permissions and shared libraries.
+
     ldd /usr/bin/program
-
-Make sure the required libraries are installed in locations searched by the dynamic linker.
-
-## Hardware Problems
-
-Check whether the required kernel driver and firmware are available.
-Useful commands include:
-    lspci
-    lsusb
-    dmesg
 
 ## Network Problems
 
-Check the network interface state and assigned addresses:
     ip link
     ip addr
     ip route
+    dmesg
 
-Check that the required network interface and DHCP tools are installed and configured.
+## Hardware Problems
+
+    lspci
+    lsusb
+    dmesg

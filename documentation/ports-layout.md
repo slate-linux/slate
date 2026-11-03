@@ -1,45 +1,36 @@
 # Ports Directory Layout
 
-Slate organizes its ports into categories under /usr/ports.
-Each package has its own directory containing a port.sh build script.
+Ports are organized into categories under /usr/ports.
+
+Each package normally contains a port.sh build script.
 
 ## Categories
 
-- dev: Compilers, build systems and development tools.
-- lib: Shared libraries and supporting components.
-- meta: Collections of related packages.
-- misc: Miscellaneous applications and utilities.
-- net: Networking software and network utilities.
+- dev: Compilers and development tools.
+- lib: Libraries.
+- meta: Package collections.
+- misc: Miscellaneous software.
+- net: Networking software.
 - perl: Perl and Perl modules.
-- system: Core system software and administration utilities.
-- utilities: General command-line utilities.
-- x11: X11 libraries, applications and desktop software.
+- system: Core system software.
+- utils: General utilities.
+- x11: X11 software and desktop applications.
 
-## Example Structure
+## Example
 
     /usr/ports/
-    |-- dev/
-    |   |-- gcc/
-    |   |   |-- port.sh
-    |   |-- cmake/
-    |       |-- port.sh
-    |-- lib/
-    |   |-- zlib/
-    |       |-- port.sh
-    |-- net/
-    |   |-- openssh/
-    |       |-- port.sh
-    |-- x11/
-        |-- dillo/
-            |-- port.sh
+    ├── dev/
+    │   └── cmake/
+    │       └── port.sh
+    ├── lib/
+    │   └── zlib/
+    │       └── port.sh
+    └── x11/
+        └── dillo/
+            └── port.sh
 
-## Choosing a Category
+## Counting Ports
 
-Place software in the category that best describes its primary purpose.
-Avoid creating new categories for individual packages when an existing category is suitable.
-Libraries should generally be placed in lib, development tools in dev, and X11 software in x11.
+    find . -type f -name port.sh | wc -l
 
-## Package Directory Contents
-
-A package directory normally contains its port.sh script and may contain supporting files.
-Downloaded source archives and extracted build directories are temporary build files, not port definitions.
+Ports are grouped by their primary purpose.
