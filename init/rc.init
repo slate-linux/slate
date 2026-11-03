@@ -4,7 +4,7 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin
 export PATH
 
 BOOTLOG=/var/log/boot.log
-
+mount -o remount,rw "$(findmnt -n -o SOURCE /)"
 mkdir -p /var/log
 : > "$BOOTLOG"
 

@@ -190,4 +190,6 @@ ls -lh "$IMG"
 echo
 echo "Partitions:"
 sudo fdisk -l "$IMG"
-sudo cp "$IMG" /home/login/distro/slate-linux.iso
+touch sysroot/usr/local/.installed
+sudo tar -cf - sysroot/ | xz -9e -T0 > archive.tar.xz
+rm sysroot/usr/local/.installed

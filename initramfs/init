@@ -1,0 +1,12 @@
+#!/bin/sh
+
+/bin/toybox mount -t devtmpfs devtmpfs /dev
+/bin/toybox mount -t proc proc /proc
+/bin/toybox mount -t sysfs sysfs /sys
+ls /sys/class/block
+device=$(/bin/choose-root)
+
+/bin/toybox mkdir -p /newroot
+/bin/toybox mount -r "/dev/$device" /newroot
+
+exec /bin/slate-switch-root /newroot /sbin/init
