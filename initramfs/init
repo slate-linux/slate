@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/toybox sh
 
 /bin/toybox mount -t devtmpfs devtmpfs /dev
 /bin/toybox mount -t proc proc /proc
