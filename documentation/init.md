@@ -1,45 +1,46 @@
 # Slate Init System
 
-Slate uses a lightweight shell-based initialization system. The `/bin/rc.init` script is responsible for executing startup scripts and launching virtual terminals.
+Slate uses a lightweight shell-based initialization system.
+
+The main initialization script is /bin/rc.init.
 
 ## Startup Scripts
 
-Startup scripts are stored in `/etc/init.d/` and executed sequentially in lexicographical filename order.
+Startup scripts are stored in /etc/init.d/.
 
 Example:
 
-\`\`\`
-/etc/init.d/
-├── 01-filesystems
-├── 02-network
-└── 03-hostname
-\`\`\`
+    /etc/init.d/
+    ├── 01-filesystems
+    ├── 02-network
+    └── 03-hostname
 
-Scripts are executed using `/bin/sh`. Files ending in `.sh` or `.rc` are skipped.
+Scripts execute sequentially in lexicographical order using /bin/sh.
 
-Prefix scripts with numbers to control their execution order.
+Scripts ending in .sh or .rc are skipped by the documented implementation.
 
 ## Boot Logging
 
-The init system records startup output in `/var/log/boot.log`.
+Startup output is recorded in /var/log/boot.log.
 
-Each startup script receives a status:
+Each script receives a status:
 
-- `[ OK ]` - Script completed successfully.
-- `[FAIL]` - Script returned a nonzero exit status.
+- [ OK ] - Successful execution.
+- [FAIL] - Failed execution.
 
-Execution time is also recorded for each script.
+Execution time is also recorded.
 
-Failed startup scripts do not prevent subsequent scripts from executing.
+A failed startup script does not prevent subsequent scripts from executing.
 
 ## Virtual Terminals
 
-After initialization, the screen is cleared and three virtual terminals are started using Toybox getty.
+Three virtual terminals are started using Toybox getty.
 
-The terminals automatically restart if getty exits.
+Terminals restart if getty exits.
 
-## Init Configuration
+## Writing Startup Scripts
 
-The main initialization script is located at `/bin/rc.init`.
-
-Startup scripts should be placed in `/etc/init.d/` and should use POSIX shell syntax.
+- Use POSIX shell syntax.
+- Give scripts executable permissions.
+- Prefix filenames with numbers.
+- Keep scripts focused on one task.

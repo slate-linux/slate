@@ -1,33 +1,40 @@
 # Testing and Releasing Slate
 
-Slate releases should be tested before being distributed.
-Testing should cover both the base system and optional software.
+## Build Testing
 
-## Port Testing
+- Build from a clean working tree.
+- Verify the target compiler.
+- Check sysroot contents.
+- Inspect generated archives.
+- Verify initramfs contents.
 
-- Build new ports from a clean source directory.
-- Verify that downloads and source versions are correct.
-- Check that installation uses the staging directory.
-- Test the installed software.
-- Test package removal.
+## Boot Testing
 
-## Installation Testing
+- Test a fresh virtual machine.
+- Verify root filesystem selection.
+- Verify switch-root.
+- Check startup script ordering.
+- Test virtual terminals.
+- Test boot logging.
 
-- Test installation in a clean virtual machine.
-- Test booting the installed system.
-- Verify that root login works.
-- Verify that normal user accounts work.
-- Test networking.
-- Install additional packages using Slate.
-- Test shutdown and reboot.
+## System Testing
 
-## Upgrade Testing
+- Test filesystem mounting.
+- Test hostname configuration.
+- Test Ethernet and DHCP.
+- Test Wi-Fi where supported.
+- Test reboot and shutdown.
 
-Test upgrades from the previous release when an upgrade path is provided.
-Check that existing configuration files and installed packages remain usable.
+## Package Testing
+
+- Build ports from clean source directories.
+- Test installation.
+- Test removal.
+- Test repository configuration.
+- Test multiple repositories.
 
 ## Release Notes
 
-Release notes should describe notable changes since the previous release.
-Include new ports, updated packages, bug fixes, installer changes and known issues.
-Avoid listing every minor internal change unless it affects users or maintainers.
+Document major changes, new functionality, bug fixes, and known issues.
+
+Do not describe unfinished features as completed.

@@ -1,28 +1,36 @@
 # Building Software for Slate
 
-Software for Slate should be compiled against the Slate target environment.
-Slate uses musl, so builds targeting glibc should not be assumed to work without modification.
+Slate uses musl as its C library.
 
 ## Cross Compilation
 
-The Slate toolchain uses the x86_64-linux-musl target compiler.
-Use the target compiler when building software for the Slate sysroot.
+The target compiler is x86_64-linux-musl-gcc.
 
 Example:
+
     x86_64-linux-musl-gcc --sysroot=/path/to/sysroot source.c -o program
 
 ## Sysroot
 
-The sysroot provides the target headers, libraries and system files used during compilation.
-Make sure the sysroot contains the dependencies required by the program being built.
+The sysroot contains target headers, libraries, and system files.
+
+Ensure the sysroot contains all required dependencies.
+
+## Build Systems
+
+Build systems may require:
+
+- CC
+- CXX
+- AR
+- RANLIB
+- PKG_CONFIG
+- PKG_CONFIG_SYSROOT_DIR
 
 ## Build Failures
 
-Build failures can be caused by missing dependencies, incompatible build options or assumptions about glibc.
-Check compiler output before changing source code.
-When patching software, keep patches small and document why they are required.
+Common problems include missing dependencies, incorrect host settings, and assumptions about glibc.
 
 ## Testing
 
-Whenever possible, test compiled software inside a running Slate installation.
-A successful compilation does not guarantee that the program will run correctly.
+Test compiled software inside a running Slate installation whenever possible.
