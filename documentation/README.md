@@ -15,6 +15,4 @@ This documentation describes Slate Linux and its 0.6 development direction.
 - ports.md - Creating and maintaining ports
 - building.md - Building software
 - installation.md - Installation
-- releasing.md - Testing and releasing
 - troubleshooting.md - Troubleshooting
-- release-0.6.md - Slate 0.6 development notes
