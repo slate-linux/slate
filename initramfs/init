@@ -10,3 +10,4 @@ device=$(/bin/choose-root)
 /bin/toybox mount -r "/dev/$device" /newroot
 
 exec /bin/slate-switch-root /newroot /sbin/init
+
