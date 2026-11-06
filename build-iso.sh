@@ -8,7 +8,7 @@ INITRAMFS="$BASE/initramfs"
 INITRD="$BASE/slate-initramfs"
 IMG="$BASE/slate.img"
 
-EXTRA_MB=50
+EXTRA_MB=2
 
 LOOP=""
 MNT=""
