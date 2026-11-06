@@ -1,2 +1,21 @@
 #!/bin/sh
-hostname "$(cat /etc/hostname)" 2>/dev/null
+
+start() {
+    hostname "$(cat /etc/hostname)"
+}
+
+stop() {
+    hostname localhost
+}
+
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+    start|"") start ;;
+    stop) stop ;;
+    restart) restart ;;
+    *) echo "Usage: $0 {start|stop|restart}" ; exit 1 ;;
+esac

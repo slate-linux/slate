@@ -1,11 +1,11 @@
 #!/bin/sh
 
-echo "Stopping services..."
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+export PATH
 
-# Stop SSH
-[ -x /etc/init.d/sshd ] && /etc/init.d/sshd stop
+echo "Stopping Slate Linux..."
 
-# Stop other services here
+rc.init stop
 
 echo "Syncing filesystems..."
 sync

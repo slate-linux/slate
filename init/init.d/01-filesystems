@@ -1,9 +1,32 @@
 #!/bin/sh
-mount -t proc proc /proc
-mount -t sysfs sysfs /sys
-mount -t devtmpfs devtmpfs /dev
-# Enables virtual terminals (like xterm)
-mkdir /dev/pts
-mount -t devpts devpts /dev/pts
-mount -a
-mount -o remount,rw /
+
+start() {
+    mount -t proc proc /proc
+    mount -t sysfs sysfs /sys
+    mount -t devtmpfs devtmpfs /dev
+
+    mkdir -p /dev/pts
+    mount -t devpts devpts /dev/pts
+
+    mount -a
+    mount -o remount,rw /
+}
+
+stop() {
+    umount /dev/pts 2>/dev/null
+    umount /proc 2>/dev/null
+    umount /sys 2>/dev/null
+    umount /dev 2>/dev/null
+}
+
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+    start|"") start ;;
+    stop) stop ;;
+    restart) restart ;;
+    *) echo "Usage: $0 {start|stop|restart}" ; exit 1 ;;
+esac

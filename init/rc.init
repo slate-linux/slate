@@ -4,47 +4,70 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin
 export PATH
 
 BOOTLOG=/var/log/boot.log
-mount -o remount,rw "$(findmnt -n -o SOURCE /)"
-mkdir -p /var/log
-: > "$BOOTLOG"
 
 log() {
     echo "$*" | tee -a "$BOOTLOG"
 }
 
-log "Starting Slate Linux..."
+start_services() {
+    mount -o remount,rw "$(findmnt -n -o SOURCE /)" 2>/dev/null
+    mkdir -p /var/log
+    : > "$BOOTLOG"
 
-FAILED=0
+    log "Starting Slate Linux..."
 
-for script in /etc/init.d/*; do
-    [ -f "$script" ] || continue
+    FAILED=0
 
-    case "$script" in
-        *.sh|*.rc) continue ;;
-    esac
+    for script in /etc/init.d/*; do
+        [ -f "$script" ] || continue
 
-    name=${script##*/}
+        case "$script" in
+            *.sh|*.rc) continue ;;
+        esac
 
-    log "Starting $name..."
+        name=${script##*/}
 
-    start=$(date +%s)
+        log "Starting $name..."
 
-    if sh "$script" >> "$BOOTLOG" 2>&1; then
-        result="[ OK ]"
-    else
-        result="[FAIL]"
-        FAILED=$((FAILED + 1))
-    fi
+        start=$(date +%s)
 
-    end=$(date +%s)
-    elapsed=$((end - start))
+        if sh "$script" start >> "$BOOTLOG" 2>&1; then
+            result="[ OK ]"
+        else
+            result="[FAIL]"
+            FAILED=$((FAILED + 1))
+        fi
 
-    log "$result $name (${elapsed}s)"
-done
+        end=$(date +%s)
+        elapsed=$((end - start))
 
-log "Initialization complete. Failures: $FAILED"
+        log "$result $name (${elapsed}s)"
+    done
 
-clear
+    log "Initialization complete. Failures: $FAILED"
+}
+
+stop_services() {
+    echo "Stopping services..."
+
+    for script in $(find /etc/init.d -type f | sort -r); do
+        case "$script" in
+            *.sh|*.rc) continue ;;
+        esac
+
+        [ -f "$script" ] || continue
+
+        name=${script##*/}
+        echo "Stopping $name..."
+
+        sh "$script" stop
+    done
+}
+
+restart_services() {
+    stop_services
+    start_services
+}
 
 spawn() {
     while :; do
@@ -53,9 +76,28 @@ spawn() {
     done
 }
 
-spawn tty1 &
-spawn tty2 &
-spawn tty3 &
+case "${1:-start}" in
+    start)
+        start_services
+        clear
 
-wait
+        spawn tty1 &
+        spawn tty2 &
+        spawn tty3 &
 
+        wait
+        ;;
+
+    stop)
+        stop_services
+        ;;
+
+    restart)
+        restart_services
+        ;;
+
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+        ;;
+esac
