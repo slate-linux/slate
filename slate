@@ -372,12 +372,12 @@ case "$1" in
         # Execute the port.
         if [ "$SILENT" -eq 1 ]; then
             (
-                cd "$PORT_DIR" &&
-                PORT_NAME="$PORT_NAME" \
-                PORT_DIR="$PORT_DIR" \
-                DESTDIR="$STAGE" \
-                MAKETHREADS="$MAKETHREADS" \
-                bash "$PORT_SCRIPT"
+            PORT_NAME="$PORT_NAME" \
+   	    PORT_DIR="$PORT_DIR" \
+	    PORTS_DIR="$PORT_DIR" \
+  	    DESTDIR="$STAGE" \
+	    MAKETHREADS="$MAKETHREADS" \
+	    bash "$PORT_SCRIPT"    
             ) > "$LOG_FILE" 2>&1
         else
             (
