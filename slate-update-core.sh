@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 # Check for updates
 if [ "$1" = "--check" ]; then
@@ -28,7 +27,7 @@ cd /tmp
     echo "Please run as root."
     exit 1
 }
-
+slate install utils/cpio
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 cd "$TMPDIR"
@@ -49,7 +48,7 @@ cd initramfs && find . -print0 | cpio --null -o -H newc | gzip -9 > ../slate-ini
 # package manager update
 echo "Updating Package Manager"
 cp slate /usr/bin/slate
-
+cp slate-update-core.sh /usr/bin/slate-update-core
 # init update
 echo "Updating Init System"
 cd init
