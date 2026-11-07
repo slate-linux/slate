@@ -84,7 +84,6 @@ spawn() {
 case "${1:-start}" in
     start)
         start_services
-        clear
 
         spawn tty1 &
         spawn tty2 &
