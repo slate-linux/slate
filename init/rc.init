@@ -6,11 +6,13 @@ export PATH
 BOOTLOG=/var/log/boot.log
 
 log() {
-    echo "$*" | tee -a "$BOOTLOG"
+    echo "$*" >> "$BOOTLOG"
+    echo "$*"
 }
 
 start_services() {
-    mount -o remount,rw "$(findmnt -n -o SOURCE /)" 2>/dev/null
+    mount -o remount,rw / 2>/dev/null
+
     mkdir -p /var/log
     : > "$BOOTLOG"
 
@@ -29,7 +31,8 @@ start_services() {
 
         log "Starting $name..."
 
-        start=$(date +%s)
+        read start _ < /proc/uptime
+        start=${start%%.*}
 
         if sh "$script" start >> "$BOOTLOG" 2>&1; then
             result="[ OK ]"
@@ -38,7 +41,9 @@ start_services() {
             FAILED=$((FAILED + 1))
         fi
 
-        end=$(date +%s)
+        read end _ < /proc/uptime
+        end=${end%%.*}
+
         elapsed=$((end - start))
 
         log "$result $name (${elapsed}s)"
