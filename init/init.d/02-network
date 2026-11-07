@@ -4,7 +4,7 @@ start() {
     ip link set eth0 up
     ip link set lo up
 
-    /usr/local/bin/sdhcp eth0
+    sdhcp eth0
 
     echo 0 999999999 > /proc/sys/net/ipv4/ping_group_range
 }
