@@ -2,9 +2,10 @@
 set -e
 
 BASE="/home/login/distro"
+REPO="$BASE/slate"
 
 SYSROOT="$BASE/sysroot"
-INITRAMFS="$BASE/initramfs"
+INITRAMFS="$REPO/initramfs"
 INITRD="$BASE/slate-initramfs"
 IMG="$BASE/slate.img"
 
@@ -12,7 +13,7 @@ EXTRA_MB=2
 
 LOOP=""
 MNT=""
-sudo cp -r ports/ sysroot/usr/
+sudo cp -r "$BASE/ports" "$SYSROOT/usr/"
 cleanup() {
     set +e
 
@@ -42,10 +43,22 @@ if [ ! -d "$INITRAMFS" ]; then
 fi
 
 
-cd ~/distro/initramfs && find . -print0 | cpio --null -o -H newc | gzip -9 > ../slate-initramfs && cd .. && sudo cp slate-initramfs sysroot/boot/slate-initramfs
+# Install the init system from the repo into the sysroot.
+sudo mkdir -p "$SYSROOT/etc/init.d" "$SYSROOT/usr/bin"
+sudo cp -f "$REPO"/init/rc.init "$REPO"/init/rc.reboot "$REPO"/init/rc.shutdown "$SYSROOT/usr/bin/"
+sudo cp -f "$REPO"/init/init.d/* "$SYSROOT/etc/init.d/"
+sudo chmod 755 "$SYSROOT"/usr/bin/rc.* "$SYSROOT"/etc/init.d/*
+sudo ln -sf /bin/rc.init "$SYSROOT/etc/rc"
 
-
+# Build the initramfs. zstd decompresses much faster than gzip at boot.
 sudo mkdir -p "$SYSROOT/boot"
+if command -v zstd >/dev/null 2>&1; then
+    (cd "$INITRAMFS" && find . -print0 | cpio --null -o -H newc 2>/dev/null |
+        zstd -19 -T0 -q -f -o "$INITRD")
+else
+    (cd "$INITRAMFS" && find . -print0 | cpio --null -o -H newc 2>/dev/null |
+        gzip -9 > "$INITRD")
+fi
 
 sudo cp -f \
     "$INITRD" \
@@ -149,7 +162,7 @@ sudo grub-install \
 sudo mkdir -p "$MNT/boot/grub"
 
 sudo tee "$MNT/boot/grub/grub.cfg" >/dev/null <<EOF
-set timeout=3
+set timeout=1
 set default=0
 
 menuentry "Slate Linux" {
@@ -190,6 +203,6 @@ ls -lh "$IMG"
 echo
 echo "Partitions:"
 sudo fdisk -l "$IMG"
-touch sysroot/usr/local/.installed
-sudo tar -cf - sysroot/ | xz -9e -T0 > archive.tar.xz
-rm sysroot/usr/local/.installed
+touch "$SYSROOT/usr/local/.installed"
+sudo tar -cf - "$SYSROOT" | xz -9e -T0 > "$BASE/archive.tar.xz"
+rm "$SYSROOT/usr/local/.installed"

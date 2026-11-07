@@ -1,7 +1,10 @@
 #!/bin/sh
 
 start() {
-    hostname "$(cat /etc/hostname)"
+    # Read directly instead of forking cat(1).
+    if IFS= read -r name < /etc/hostname && [ -n "$name" ]; then
+        hostname "$name"
+    fi
 }
 
 stop() {

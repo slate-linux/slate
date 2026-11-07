@@ -1,0 +1,86 @@
+#!/bin/sh
+
+# Run everything in /etc/init.d in filename order.
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/sbin
+export PATH
+
+BOOTLOG=/var/log/boot.log
+ACTION=${1:-start}
+FAILED=0
+
+mkdir -p /var/log
+
+log() {
+    printf '%s\n' "$*" >> "$BOOTLOG"
+    printf '%s\n' "$*"
+}
+
+# Seconds since boot, without forking date(1).
+uptime_seconds() {
+    read -r up _ < /proc/uptime
+    printf '%s' "${up%%.*}"
+}
+
+run_service() {
+    script=$1
+    name=${script##*/}
+
+    log "Starting $name..."
+
+    start=$(uptime_seconds)
+    if sh "$script" start >>"$BOOTLOG" 2>&1; then
+        result="[ OK ]"
+    else
+        result="[FAIL]"
+        FAILED=$((FAILED + 1))
+    fi
+    end=$(uptime_seconds)
+
+    log "$result $name ($((end - start))s)"
+}
+
+start_all() {
+    mount -o remount,rw / 2>/dev/null
+    mkdir -p /var/log
+    : > "$BOOTLOG"
+
+    log "Starting Slate Linux..."
+
+    FAILED=0
+    for script in /etc/init.d/*; do
+        [ -f "$script" ] || continue
+        case "$script" in
+            *.sh|*.rc|*/startfiles) continue ;;
+        esac
+        run_service "$script"
+    done
+
+    log "Initialization complete. Failures: $FAILED"
+}
+
+stop_all() {
+    log "Stopping services..."
+
+    # Stop in reverse order of startup.
+    for script in $(find /etc/init.d -type f | sort -r); do
+        case "$script" in
+            *.sh|*.rc|*/startfiles) continue ;;
+        esac
+
+        [ -f "$script" ] || continue
+        name=${script##*/}
+        log "Stopping $name..."
+        sh "$script" stop >>"$BOOTLOG" 2>&1
+    done
+}
+
+case "$ACTION" in
+    start)   start_all ;;
+    stop)    stop_all ;;
+    restart) stop_all; start_all ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}" >&2
+        exit 1
+        ;;
+esac

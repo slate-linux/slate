@@ -1,78 +1,12 @@
 #!/bin/sh
 
-PATH=/bin:/sbin:/usr/bin:/usr/sbin
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/sbin
 export PATH
 
-BOOTLOG=/var/log/boot.log
-
-log() {
-    echo "$*" >> "$BOOTLOG"
-    echo "$*"
-}
-
-start_services() {
-    mount -o remount,rw / 2>/dev/null
-
-    mkdir -p /var/log
-    : > "$BOOTLOG"
-
-    log "Starting Slate Linux..."
-
-    FAILED=0
-
-    for script in /etc/init.d/*; do
-        [ -f "$script" ] || continue
-
-        case "$script" in
-            *.sh|*.rc) continue ;;
-        esac
-
-        name=${script##*/}
-
-        log "Starting $name..."
-
-        read start _ < /proc/uptime
-        start=${start%%.*}
-
-        if sh "$script" start >> "$BOOTLOG" 2>&1; then
-            result="[ OK ]"
-        else
-            result="[FAIL]"
-            FAILED=$((FAILED + 1))
-        fi
-
-        read end _ < /proc/uptime
-        end=${end%%.*}
-
-        elapsed=$((end - start))
-
-        log "$result $name (${elapsed}s)"
-    done
-
-    log "Initialization complete. Failures: $FAILED"
-}
-
-stop_services() {
-    echo "Stopping services..."
-
-    for script in $(find /etc/init.d -type f | sort -r); do
-        case "$script" in
-            *.sh|*.rc) continue ;;
-        esac
-
-        [ -f "$script" ] || continue
-
-        name=${script##*/}
-        echo "Stopping $name..."
-
-        sh "$script" stop
-    done
-}
-
-restart_services() {
-    stop_services
-    start_services
-}
+# Allow: rc.init start <service>
+if [ -n "$2" ]; then
+    exec sh "/etc/init.d/$2" "${1:-start}"
+fi
 
 spawn() {
     while :; do
@@ -83,8 +17,10 @@ spawn() {
 
 case "${1:-start}" in
     start)
-        start_services
+        mount -o remount,rw / 2>/dev/null
+        sh /etc/init.d/startfiles start
 
+        # One getty per virtual terminal; they run independently.
         spawn tty1 &
         spawn tty2 &
         spawn tty3 &
@@ -93,15 +29,15 @@ case "${1:-start}" in
         ;;
 
     stop)
-        stop_services
+        sh /etc/init.d/startfiles stop
         ;;
 
     restart)
-        restart_services
+        sh /etc/init.d/startfiles restart
         ;;
 
     *)
-        echo "Usage: $0 {start|stop|restart}"
+        echo "Usage: $0 {start|stop|restart} [service]" >&2
         exit 1
         ;;
 esac

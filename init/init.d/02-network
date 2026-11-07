@@ -1,10 +1,15 @@
 #!/bin/sh
 
 start() {
-    ip link set eth0 up
     ip link set lo up
+    ip link set eth0 up
 
-    sdhcp eth0
+    # DHCP can take seconds; don't hold up the rest of boot.
+    if command -v sdhcp >/dev/null 2>&1; then
+        sdhcp eth0 >>/var/log/boot.log 2>&1 &
+    elif [ -x /usr/local/sbin/sdhcp ]; then
+        /usr/local/sbin/sdhcp eth0 >>/var/log/boot.log 2>&1 &
+    fi
 
     echo 0 999999999 > /proc/sys/net/ipv4/ping_group_range
 }

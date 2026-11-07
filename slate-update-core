@@ -43,12 +43,19 @@ cd slate
 
 # Initramfs update
 echo "Generating initramfs"
-cd initramfs && find . -print0 | cpio --null -o -H newc | gzip -9 > ../slate-initramfs && cd .. && cp slate-initramfs /boot/slate-initramfs
+cd initramfs
+if command -v zstd >/dev/null 2>&1; then
+    find . -print0 | cpio --null -o -H newc 2>/dev/null | zstd -19 -T0 -q -f -o ../slate-initramfs
+else
+    find . -print0 | cpio --null -o -H newc 2>/dev/null | gzip -9 > ../slate-initramfs
+fi
+cd ..
+cp slate-initramfs /boot/slate-initramfs
 
 # package manager update
 echo "Updating Package Manager"
 cp slate /usr/bin/slate
-cp slate-update-core.sh /usr/bin/slate-update-core
+cp slate-update-core /usr/bin/slate-update-core
 # init update
 echo "Updating Init System"
 cd init

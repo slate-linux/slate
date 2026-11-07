@@ -1,13 +1,53 @@
 #!/bin/toybox sh
 
+PATH=/bin
+export PATH
+
+# Mount the virtual filesystems the rest of the boot needs.
+/bin/toybox mkdir -p /proc /sys /dev
 /bin/toybox mount -t devtmpfs devtmpfs /dev
 /bin/toybox mount -t proc proc /proc
 /bin/toybox mount -t sysfs sysfs /sys
-ls /sys/class/block
-device=$(/bin/choose-root)
+
+# Default to the filesystem label the installer uses.
+tag=LABEL
+value=SLATE-ROOT
+dev=
+spec=
+
+# root=/ROOT= on the kernel command line overrides the default.
+cmdline=$(/bin/toybox cat /proc/cmdline)
+for arg in $cmdline; do
+    if [ "${arg#root=}" != "$arg" ] || [ "${arg#ROOT=}" != "$arg" ]; then
+        spec=${arg#*=}
+    fi
+done
+
+if [ "${spec#/dev/}" != "$spec" ]; then
+    dev=$spec
+fi
+if [ "${spec#UUID=}" != "$spec" ]; then
+    tag=UUID
+    value=${spec#UUID=}
+fi
+if [ "${spec#LABEL=}" != "$spec" ]; then
+    tag=LABEL
+    value=${spec#LABEL=}
+fi
+
+# Find the tagged filesystem on the block devices we can see.
+if [ -z "$dev" ]; then
+    pattern="$tag=\"$value\""
+    dev=$(/bin/toybox blkid 2>/dev/null | /bin/toybox grep -F "$pattern" |
+        /bin/toybox cut -d: -f1 | /bin/toybox head -n 1)
+fi
+
+# Last resort: ask the operator (old behaviour).
+if [ -z "$dev" ] || [ ! -b "$dev" ]; then
+    dev="/dev/$(/bin/choose-root)"
+fi
 
 /bin/toybox mkdir -p /newroot
-/bin/toybox mount -r "/dev/$device" /newroot
+/bin/toybox mount -o ro "$dev" /newroot
 
 exec /bin/slate-switch-root /newroot /sbin/init
-
