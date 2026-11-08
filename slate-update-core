@@ -6,7 +6,7 @@ if [ "$1" = "--check" ]; then
 
     CURRENT=$(cat /etc/slate.conf/ver)
     VERSION=$(git ls-remote --tags --sort='version:refname' \
-        https://github.com/surprisedcat32/slate.git |
+        https://github.com/slate-linux/slate.git |
         grep -v '\^{}' | tail -n 1 | sed 's|.*refs/tags/||')
 
     echo "Current version: $CURRENT"
@@ -35,10 +35,10 @@ cd "$TMPDIR"
 echo "Downloading update files"
 
 VERSION=$(git ls-remote --tags --sort='version:refname' \
-    https://github.com/surprisedcat32/slate.git |
+    https://github.com/slate-linux/slate.git |
     grep -v '\^{}' | tail -n 1 | sed 's|.*refs/tags/||')
 
-git clone --branch "$VERSION" https://github.com/surprisedcat32/slate.git
+git clone --branch "$VERSION" https://github.com/slate-linux/slate.git
 cd slate
 
 # Initramfs update

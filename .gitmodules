@@ -1,7 +1,7 @@
 [submodule "packages"]
 	path = packages
-	url = https://github.com/surprisedcat32/slate-ports.git
+	url = https://github.com/slate-linux/slate-ports.git
 [submodule "documentation"]
 	path = documentation
-	url = https://github.com/surprisedcat32/slate-web.git
+	url = https://github.com/slate-linux/slate-web.git
 	branch = main
