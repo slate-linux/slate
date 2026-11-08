@@ -1,53 +1,50 @@
+
 #!/bin/toybox sh
 
 PATH=/bin
 export PATH
 
-# Mount the virtual filesystems the rest of the boot needs.
+# Mount virtual filesystems.
 /bin/toybox mkdir -p /proc /sys /dev
 /bin/toybox mount -t devtmpfs devtmpfs /dev
 /bin/toybox mount -t proc proc /proc
 /bin/toybox mount -t sysfs sysfs /sys
 
-# Default to the filesystem label the installer uses.
-tag=LABEL
-value=SLATE-ROOT
-dev=
-spec=
+# Read root device from kernel command line.
+spec=$(/bin/toybox cat /proc/cmdline | /bin/toybox grep -o 'root=[^ ]*')
+spec=${spec#root=}
 
-# root=/ROOT= on the kernel command line overrides the default.
-cmdline=$(/bin/toybox cat /proc/cmdline)
-for arg in $cmdline; do
-    if [ "${arg#root=}" != "$arg" ] || [ "${arg#ROOT=}" != "$arg" ]; then
-        spec=${arg#*=}
-    fi
-done
+dev=
 
 if [ "${spec#/dev/}" != "$spec" ]; then
     dev=$spec
 fi
-if [ "${spec#UUID=}" != "$spec" ]; then
-    tag=UUID
-    value=${spec#UUID=}
-fi
-if [ "${spec#LABEL=}" != "$spec" ]; then
-    tag=LABEL
-    value=${spec#LABEL=}
+
+# Resolve UUID or LABEL.
+if [ -z "$dev" ] && [ -n "$spec" ]; then
+    case "$spec" in
+        UUID=*)
+            pattern="UUID=\"${spec#UUID=}\""
+            ;;
+        LABEL=*)
+            pattern="LABEL=\"${spec#LABEL=}\""
+            ;;
+    esac
+
+    if [ -n "$pattern" ]; then
+        dev=$(/bin/toybox blkid 2>/dev/null | /bin/toybox grep -F "$pattern" |
+            /bin/toybox cut -d: -f1 | /bin/toybox head -n 1)
+    fi
 fi
 
-# Find the tagged filesystem on the block devices we can see.
-if [ -z "$dev" ]; then
-    pattern="$tag=\"$value\""
-    dev=$(/bin/toybox blkid 2>/dev/null | /bin/toybox grep -F "$pattern" |
-        /bin/toybox cut -d: -f1 | /bin/toybox head -n 1)
-fi
-
-# Last resort: ask the operator (old behaviour).
+# Ask operator if root device is unavailable.
 if [ -z "$dev" ] || [ ! -b "$dev" ]; then
     dev="/dev/$(/bin/choose-root)"
 fi
 
-/bin/toybox mkdir -p /newroot
+# Mount root and switch.
+ /bin/toybox mkdir -p /newroot
 /bin/toybox mount -o ro "$dev" /newroot
 
 exec /bin/slate-switch-root /newroot /sbin/init
+

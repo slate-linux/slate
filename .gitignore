@@ -1,0 +1,3 @@
+mkiso/*
+!mkiso/build-iso-fresh.sh
+!mkiso/build-iso.sh
