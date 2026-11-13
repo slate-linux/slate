@@ -435,6 +435,7 @@ install_one() {
         (
             cd "$PORT_DIR" &&
             PORT_NAME="$PORT_NAME" \
+	    PORTS_DIR="PORTS_DIR" \
             PORT_DIR="$PORT_DIR" \
 	    VERSION="$PACKAGE_VERSION" \
             DESTDIR="$STAGE" \
@@ -447,6 +448,7 @@ install_one() {
             cd "$PORT_DIR" &&
             PORT_NAME="$PORT_NAME" \
             PORT_DIR="$PORT_DIR" \
+	    PORTS_DIR="$PORT_DIR" \
 	    VERSION="$PACKAGE_VERSION" \
             DESTDIR="$STAGE" \
             MAKETHREADS="$MAKETHREADS" \
@@ -459,6 +461,7 @@ install_one() {
             PORT_NAME="$PORT_NAME" \
             PORT_DIR="$PORT_DIR" \
 	    VERSION="$PACKAGE_VERSION" \
+	    PORTS_DIR="PORTS_DIR"
             DESTDIR="$STAGE" \
             MAKETHREADS="$MAKETHREADS" \
             bash "$PORT_SCRIPT"
