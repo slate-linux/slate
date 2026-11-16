@@ -203,6 +203,7 @@ read_meta() {
     local line value
 
     PACKAGE_VERSION=""
+    PACKAGE_HASH=""
     PACKAGE_DEPENDS=()
 
     [ -f "$meta" ] || die "missing meta.conf: $meta"
@@ -225,6 +226,22 @@ read_meta() {
             fi
 
             PACKAGE_VERSION="$value"
+        
+        elif [[ "$line" =~ ^[[:space:]]*HASH[[:space:]]*=[[:space:]]*(.*)$ ]]; then
+            value="${BASH_REMATCH[1]}"
+
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+
+            if [[ "$value" == \"* ]]; then
+                value="${value#\"}"
+                value="${value%\"}"
+            elif [[ "$value" == \'* ]]; then
+                value="${value#\'}"
+                value="${value%\'}"
+            fi
+
+            PACKAGE_HASH="$value"
 
         elif [[ "$line" =~ ^[[:space:]]*DEPENDS[[:space:]]*=[[:space:]]*(.*)$ ]]; then
             value="${BASH_REMATCH[1]}"
