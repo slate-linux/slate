@@ -296,6 +296,12 @@ package_info() {
     echo "Category: ${name%%/*}"
     echo "Version: $PACKAGE_VERSION"
 
+    if [ -n "$PACKAGE_HASH" ]; then
+        [ "$PACKAGE_HASH" = "*" ] \
+        && echo "Hash: ungiven" \
+        || echo "Hash: $PACKAGE_HASH"
+    fi
+
     if [ -n "$installed_version" ]; then
         echo "Installed: yes ($installed_version)"
     else
