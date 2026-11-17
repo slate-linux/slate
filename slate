@@ -203,6 +203,7 @@ read_meta() {
     local line value
 
     PACKAGE_VERSION=""
+    PACKAGE_HASH=""
     PACKAGE_DEPENDS=()
 
     [ -f "$meta" ] || die "missing meta.conf: $meta"
@@ -225,6 +226,22 @@ read_meta() {
             fi
 
             PACKAGE_VERSION="$value"
+        
+        elif [[ "$line" =~ ^[[:space:]]*HASH[[:space:]]*=[[:space:]]*(.*)$ ]]; then
+            value="${BASH_REMATCH[1]}"
+
+            value="${value#"${value%%[![:space:]]*}"}"
+            value="${value%"${value##*[![:space:]]}"}"
+
+            if [[ "$value" == \"* ]]; then
+                value="${value#\"}"
+                value="${value%\"}"
+            elif [[ "$value" == \'* ]]; then
+                value="${value#\'}"
+                value="${value%\'}"
+            fi
+
+            PACKAGE_HASH="$value"
 
         elif [[ "$line" =~ ^[[:space:]]*DEPENDS[[:space:]]*=[[:space:]]*(.*)$ ]]; then
             value="${BASH_REMATCH[1]}"
@@ -278,6 +295,12 @@ package_info() {
     echo "Package: ${name##*/}"
     echo "Category: ${name%%/*}"
     echo "Version: $PACKAGE_VERSION"
+
+    if [ -n "$PACKAGE_HASH" ]; then
+        [ "$PACKAGE_HASH" = "*" ] \
+        && echo "Hash: ungiven" \
+        || echo "Hash: $PACKAGE_HASH"
+    fi
 
     if [ -n "$installed_version" ]; then
         echo "Installed: yes ($installed_version)"
@@ -440,6 +463,7 @@ install_one() {
 	    VERSION="$PACKAGE_VERSION" \
             DESTDIR="$STAGE" \
             MAKETHREADS="$MAKETHREADS" \
+            HASH="$PACKAGE_HASH"\
             bash "$PORT_SCRIPT"
         ) > "$LOG_FILE" 2>&1
 
@@ -452,6 +476,7 @@ install_one() {
 	    VERSION="$PACKAGE_VERSION" \
             DESTDIR="$STAGE" \
             MAKETHREADS="$MAKETHREADS" \
+            HASH="$PACKAGE_HASH"\
             bash -x "$PORT_SCRIPT"
         )
 
@@ -464,6 +489,7 @@ install_one() {
 	    PORTS_DIR="$PORTS_DIR"
             DESTDIR="$STAGE" \
             MAKETHREADS="$MAKETHREADS" \
+            HASH="$PACKAGE_HASH"\
             bash "$PORT_SCRIPT"
         )
     fi
